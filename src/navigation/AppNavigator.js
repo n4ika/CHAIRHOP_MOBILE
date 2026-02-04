@@ -8,6 +8,8 @@ import HomeScreen from '../screens/HomeScreen';
 import BrowseAppointmentsScreen from '../screens/customer/BrowseAppointmentsScreen';
 import AppointmentDetailsScreen from '../screens/customer/AppointmentDetailsScreen';
 import MyBookingsScreen from '../screens/customer/MyBookingsScreen';
+import StylistAppointmentsScreen from '../screens/stylist/StylistAppointmentsScreen';
+import CreateAvailabilityScreen from '../screens/stylist/CreateAvailabilityScreen';
 
 const Stack = createStackNavigator();
 
@@ -45,6 +47,16 @@ export default function AppNavigator() {
             name="MyBookings"
             component={MyBookingsScreen}
             options={{ title: 'My Bookings' }}
+          />
+          <Stack.Screen
+            name="StylistAppointments"
+            component={StylistAppointmentsScreen}
+            options={{ title: 'My Appointments' }}
+          />
+          <Stack.Screen
+            name="CreateAvailability"
+            component={CreateAvailabilityScreen}
+            options={{ title: 'Create Availability' }}
           />
         </Stack.Navigator>
       ) : (

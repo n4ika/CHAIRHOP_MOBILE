@@ -22,22 +22,34 @@ export default function HomeScreen({ navigation }) {
         Username: {user?.username}
       </Text>
 
-      <Button
-        mode="contained"
-        onPress={() => navigation.navigate('BrowseAppointments')}
-        style={styles.button}
-      >
-        Browse Appointments
-      </Button>
-
-      <Button
-        mode="outlined"
-        onPress={() => navigation.navigate('MyBookings')}
-        style={styles.button}
-        icon="calendar-check"
-      >
-        My Bookings
-      </Button>
+      {user?.role === 'customer' ? (
+        <>
+          <Button
+            mode="contained"
+            onPress={() => navigation.navigate('BrowseAppointments')}
+            style={styles.button}
+          >
+            Browse Appointments
+          </Button>
+          <Button
+            mode="outlined"
+            onPress={() => navigation.navigate('MyBookings')}
+            style={styles.button}
+            icon="calendar-check"
+          >
+            My Bookings
+          </Button>
+        </>
+      ) : (
+        <Button
+          mode="contained"
+          onPress={() => navigation.navigate('StylistAppointments')}
+          style={styles.button}
+          icon="calendar-multiple"
+        >
+          My Appointments
+        </Button>
+      )}
 
       <Button mode="contained" onPress={signOut} style={styles.button}>
         Sign Out
