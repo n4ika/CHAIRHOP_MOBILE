@@ -5,6 +5,9 @@ import { ActivityIndicator, View } from 'react-native';
 import { AuthContext } from '../context/AuthContext';
 import AuthNavigator from './AuthNavigator';
 import HomeScreen from '../screens/HomeScreen';
+import BrowseAppointmentsScreen from '../screens/customer/BrowseAppointmentsScreen';
+import AppointmentDetailsScreen from '../screens/customer/AppointmentDetailsScreen';
+import MyBookingsScreen from '../screens/customer/MyBookingsScreen';
 
 const Stack = createStackNavigator();
 
@@ -27,6 +30,21 @@ export default function AppNavigator() {
             name="Home"
             component={HomeScreen}
             options={{ title: 'ChairHop' }}
+          />
+          <Stack.Screen
+            name="BrowseAppointments"
+            component={BrowseAppointmentsScreen}
+            options={{ title: 'Browse Appointments' }}
+          />
+          <Stack.Screen
+            name="AppointmentDetails"
+            component={AppointmentDetailsScreen}
+            options={{ title: 'Appointment Details' }}
+          />
+          <Stack.Screen
+            name="MyBookings"
+            component={MyBookingsScreen}
+            options={{ title: 'My Bookings' }}
           />
         </Stack.Navigator>
       ) : (

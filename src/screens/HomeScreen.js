@@ -4,7 +4,7 @@ import { Text, Button } from 'react-native-paper';
 import { AuthContext } from '../context/AuthContext';
 import { COLORS, SPACING } from '../constants';
 
-export default function HomeScreen() {
+export default function HomeScreen({ navigation }) {
   const { user, signOut } = useContext(AuthContext);
 
   return (
@@ -21,6 +21,23 @@ export default function HomeScreen() {
       <Text variant="bodyMedium" style={styles.info}>
         Username: {user?.username}
       </Text>
+
+      <Button
+        mode="contained"
+        onPress={() => navigation.navigate('BrowseAppointments')}
+        style={styles.button}
+      >
+        Browse Appointments
+      </Button>
+
+      <Button
+        mode="outlined"
+        onPress={() => navigation.navigate('MyBookings')}
+        style={styles.button}
+        icon="calendar-check"
+      >
+        My Bookings
+      </Button>
 
       <Button mode="contained" onPress={signOut} style={styles.button}>
         Sign Out
