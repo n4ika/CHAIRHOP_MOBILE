@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useContext } from 'react';
 import { View, StyleSheet, FlatList, RefreshControl } from 'react-native';
 import { Text, SegmentedButtons, Surface, Button } from 'react-native-paper';
 import { useFocusEffect } from '@react-navigation/native';
@@ -6,9 +6,12 @@ import Alert from '../../utils/Alert';
 import { getMyAppointments, cancelBooking } from '../../services/appointmentsService';
 import AppointmentCard from '../../components/AppointmentCard';
 import AppointmentCardSkeleton from '../../components/skeletons/AppointmentCardSkeleton';
+import { addAppointmentToCalendar } from '../../utils/calendarUtils';
+import { AuthContext } from '../../context/AuthContext';
 import { COLORS, SPACING } from '../../constants';
 
 export default function MyBookingsScreen({ navigation }) {
+  const { user } = useContext(AuthContext);
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -80,6 +83,13 @@ export default function MyBookingsScreen({ navigation }) {
         },
       ]
     );
+  };
+
+  const handleAddToCalendar = async (appointment) => {
+    const eventId = await addAppointmentToCalendar(appointment, user.role);
+    if (eventId) {
+      Alert.alert('Success!', 'Added to calendar');
+    }
   };
 
   const handleRefresh = () => {
@@ -164,6 +174,14 @@ export default function MyBookingsScreen({ navigation }) {
               icon="close-circle"
             >
               Cancel Booking
+            </Button>
+            <Button
+              mode="text"
+              icon="calendar-plus"
+              onPress={() => handleAddToCalendar(item)}
+              compact
+            >
+              Add to Calendar
             </Button>
           </View>
         )}

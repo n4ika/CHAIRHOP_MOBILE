@@ -1,11 +1,23 @@
 import React, { useContext } from 'react';
 import { View, StyleSheet, Platform } from 'react-native';
 import { Text, Button } from 'react-native-paper';
+import * as Notifications from 'expo-notifications';
 import { AuthContext } from '../context/AuthContext';
 import { COLORS, SPACING } from '../constants';
 
 export default function HomeScreen({ navigation }) {
   const { user, signOut } = useContext(AuthContext);
+
+  const sendTestNotification = async () => {
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: 'Test Notification',
+        body: 'Push notifications are working!',
+        data: { test: true },
+      },
+      trigger: { seconds: 1 },
+    });
+  };
 
   return (
     <View style={styles.container}>
@@ -56,6 +68,24 @@ export default function HomeScreen({ navigation }) {
             </Button>
           </>
         )}
+
+        <Button
+          mode="outlined"
+          onPress={() => navigation.navigate('Conversations')}
+          style={styles.button}
+          icon="message-text"
+        >
+          Messages
+        </Button>
+
+        <Button
+          mode="outlined"
+          onPress={sendTestNotification}
+          style={styles.button}
+          icon="bell-ring"
+        >
+          Test Notification
+        </Button>
 
         <Button
           mode="outlined"

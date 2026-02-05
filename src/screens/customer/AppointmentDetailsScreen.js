@@ -20,6 +20,8 @@ import {
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { AuthContext } from '../../context/AuthContext';
 import { getAppointment, bookAppointment } from '../../services/appointmentsService';
+import { addAppointmentToCalendar } from '../../utils/calendarUtils';
+import { createConversation } from '../../services/messagingService';
 import { COLORS, SPACING } from '../../constants';
 
 export default function AppointmentDetailsScreen({ route, navigation }) {
@@ -82,6 +84,35 @@ export default function AppointmentDetailsScreen({ route, navigation }) {
         },
       ]
     );
+  };
+
+  const handleAddToCalendar = async () => {
+    const eventId = await addAppointmentToCalendar(appointment, user.role);
+    if (eventId) {
+      Alert.alert('Success!', 'Appointment added to your calendar');
+    }
+  };
+
+  const handleMessageStylist = async () => {
+    try {
+      console.log('=== CREATING/GETTING CONVERSATION ===');
+      console.log('Appointment ID:', appointmentId);
+
+      const data = await createConversation(appointmentId);
+
+      console.log('Conversation data:', data);
+      console.log('Conversation ID:', data.conversation.id);
+      console.log('Other user:', appointment.stylist);
+
+      navigation.navigate('Chat', {
+        conversationId: data.conversation.id,
+        otherUser: appointment.stylist,
+      });
+    } catch (error) {
+      console.error('=== ERROR CREATING CONVERSATION ===');
+      console.error(error);
+      Alert.alert('Error', error.toString());
+    }
   };
 
   const openMaps = () => {
@@ -240,6 +271,27 @@ export default function AppointmentDetailsScreen({ route, navigation }) {
           </Button>
         )}
 
+        {(isBooked || appointment.status === 'booked') && (
+          <>
+            <Button
+              mode="outlined"
+              icon="message-text"
+              onPress={handleMessageStylist}
+              style={styles.messageButton}
+            >
+              Message Stylist
+            </Button>
+            <Button
+              mode="outlined"
+              icon="calendar-plus"
+              onPress={handleAddToCalendar}
+              style={styles.calendarButton}
+            >
+              Add to Calendar
+            </Button>
+          </>
+        )}
+
         {!canBook && !isBooked && appointment.customer && (
           <View style={styles.unavailableContainer}>
             <Text variant="bodyLarge" style={styles.unavailableMessage}>
@@ -378,5 +430,13 @@ const styles = StyleSheet.create({
   unavailableMessage: {
     textAlign: 'center',
     color: COLORS.textLight,
+  },
+  messageButton: {
+    marginTop: SPACING.md,
+    borderRadius: 12,
+  },
+  calendarButton: {
+    marginTop: SPACING.md,
+    borderRadius: 12,
   },
 });

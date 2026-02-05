@@ -1,6 +1,8 @@
 import React, { createContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as authService from '../services/authService';
+import { registerForPushNotifications, sendPushTokenToBackend } from '../services/notificationService';
+import { initializeCable, disconnectCable } from '../services/actionCableService';
 
 export const AuthContext = createContext();
 
@@ -24,20 +26,33 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const registerNotifications = async () => {
+    const token = await registerForPushNotifications();
+    if (token) {
+      await sendPushTokenToBackend(token);
+    }
+  };
+
   const signIn = async (email, password) => {
-    const { user: userData, token } = await authService.login(email, password);
-    console.log('=== USER LOGGED IN ===');
-    console.log('Token:', token);
-    console.log('User:', userData);
+    const { user: userData } = await authService.login(email, password);
     setUser(userData);
+    registerNotifications();
+    console.log('=== CALLING INITIALIZE CABLE FROM LOGIN ===');
+    await initializeCable();
+    console.log('=== CABLE INITIALIZATION COMPLETE ===');
   };
 
   const signUp = async (email, password, name, username, role) => {
     const { user: userData } = await authService.signup(email, password, name, username, role);
     setUser(userData);
+    registerNotifications();
+    console.log('=== CALLING INITIALIZE CABLE FROM SIGNUP ===');
+    await initializeCable();
+    console.log('=== CABLE INITIALIZATION COMPLETE ===');
   };
 
   const signOut = async () => {
+    disconnectCable();
     await authService.logout();
     setUser(null);
   };

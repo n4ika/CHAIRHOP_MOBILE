@@ -1,12 +1,15 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useContext } from 'react';
 import { View, StyleSheet, FlatList, RefreshControl } from 'react-native';
 import { Text, ActivityIndicator, SegmentedButtons, Surface, FAB, Button } from 'react-native-paper';
 import { useFocusEffect } from '@react-navigation/native';
 import Alert from '../../utils/Alert';
 import { getStylistAppointments, acceptAppointment, cancelAppointment, completeAppointment } from '../../services/stylistAppointmentsService';
+import { addAppointmentToCalendar } from '../../utils/calendarUtils';
+import { AuthContext } from '../../context/AuthContext';
 import { COLORS, SPACING } from '../../constants';
 
 export default function StylistAppointmentsScreen({ navigation }) {
+  const { user } = useContext(AuthContext);
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -87,6 +90,13 @@ export default function StylistAppointmentsScreen({ navigation }) {
         },
       ]
     );
+  };
+
+  const handleAddToCalendar = async (appointment) => {
+    const eventId = await addAppointmentToCalendar(appointment, user.role);
+    if (eventId) {
+      Alert.alert('Success!', 'Added to calendar');
+    }
   };
 
   const handleComplete = async (appointmentId) => {
@@ -220,6 +230,14 @@ export default function StylistAppointmentsScreen({ navigation }) {
               textColor={COLORS.error}
             >
               Cancel
+            </Button>
+            <Button
+              mode="text"
+              icon="calendar-plus"
+              onPress={() => handleAddToCalendar(item)}
+              compact
+            >
+              Add to Calendar
             </Button>
           </View>
         )}

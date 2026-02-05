@@ -12,6 +12,8 @@ import LeaveReviewScreen from '../screens/customer/LeaveReviewScreen';
 import StylistProfileScreen from '../screens/customer/StylistProfileScreen';
 import StylistAppointmentsScreen from '../screens/stylist/StylistAppointmentsScreen';
 import CreateAvailabilityScreen from '../screens/stylist/CreateAvailabilityScreen';
+import ConversationsScreen from '../screens/common/ConversationsScreen';
+import ChatScreen from '../screens/common/ChatScreen';
 
 const Stack = createStackNavigator();
 
@@ -69,6 +71,16 @@ export default function AppNavigator() {
             name="CreateAvailability"
             component={CreateAvailabilityScreen}
             options={{ title: 'Create Availability' }}
+          />
+          <Stack.Screen
+            name="Conversations"
+            component={ConversationsScreen}
+            options={{ title: 'Messages' }}
+          />
+          <Stack.Screen
+            name="Chat"
+            component={ChatScreen}
+            options={({ route }) => ({ title: route.params?.otherUser?.name || 'Chat' })}
           />
         </Stack.Navigator>
       ) : (
