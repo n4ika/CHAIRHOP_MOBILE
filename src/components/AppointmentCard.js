@@ -1,6 +1,6 @@
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
-import { Card, Text } from 'react-native-paper';
+import { View, StyleSheet, TouchableOpacity, Platform } from 'react-native';
+import { Text } from 'react-native-paper';
 import { COLORS, SPACING } from '../constants';
 
 export default function AppointmentCard({ appointment, onPress }) {
@@ -24,8 +24,9 @@ export default function AppointmentCard({ appointment, onPress }) {
 
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
-      <Card style={styles.card}>
-        <Card.Content>
+      <View style={styles.card}>
+        <View style={styles.accentBar} />
+        <View style={styles.cardContent}>
           <View style={styles.header}>
             <Text variant="titleMedium" style={styles.stylistName}>
               {appointment.stylist?.name || 'Stylist'}
@@ -68,8 +69,8 @@ export default function AppointmentCard({ appointment, onPress }) {
               </Text>
             </View>
           )}
-        </Card.Content>
-      </Card>
+        </View>
+      </View>
     </TouchableOpacity>
   );
 }
@@ -79,7 +80,29 @@ const styles = StyleSheet.create({
     marginHorizontal: SPACING.md,
     marginVertical: SPACING.sm,
     backgroundColor: COLORS.card,
-    elevation: 2,
+    borderRadius: 16,
+    overflow: 'hidden',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 3,
+      },
+      web: {
+        boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+      },
+    }),
+  },
+  accentBar: {
+    height: 4,
+    backgroundColor: COLORS.primary,
+  },
+  cardContent: {
+    padding: SPACING.md,
   },
   header: {
     marginBottom: SPACING.md,

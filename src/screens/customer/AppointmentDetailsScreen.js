@@ -3,6 +3,9 @@ import {
   View,
   StyleSheet,
   ScrollView,
+  Pressable,
+  Linking,
+  Platform,
 } from 'react-native';
 import Alert from '../../utils/Alert';
 import {
@@ -12,7 +15,9 @@ import {
   Card,
   Divider,
   Chip,
+  Surface,
 } from 'react-native-paper';
+import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { AuthContext } from '../../context/AuthContext';
 import { getAppointment, bookAppointment } from '../../services/appointmentsService';
 import { COLORS, SPACING } from '../../constants';
@@ -25,9 +30,6 @@ export default function AppointmentDetailsScreen({ route, navigation }) {
   const [booking, setBooking] = useState(false);
 
   useEffect(() => {
-    console.log('=== AppointmentDetailsScreen Loaded ===');
-    console.log('Appointment ID:', appointmentId);
-    console.log('Current User:', user);
     fetchAppointment();
   }, []);
 
@@ -45,38 +47,21 @@ export default function AppointmentDetailsScreen({ route, navigation }) {
   };
 
   const handleBook = async () => {
-    console.log('=== BOOK BUTTON CLICKED ===');
-    console.log('Appointment:', appointment);
-    console.log('User:', user);
-    console.log('Can book?', canBook);
-
     Alert.alert(
       'Book Appointment',
-      `Book with ${appointment.stylist?.name} on ${formatDate(appointment.time)}?`,
+      `Book with ${appointment.stylist?.name} on ${formatDateLong(appointment.time)}?`,
       [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-          onPress: () => console.log('User cancelled booking')
-        },
+        { text: 'Cancel', style: 'cancel' },
         {
           text: 'Confirm',
           onPress: async () => {
-            console.log('=== USER CONFIRMED BOOKING ===');
             setBooking(true);
             try {
               const bookingData = {
                 selected_service: 'Haircut',
               };
 
-              console.log('Sending booking request...');
-              console.log('Appointment ID:', appointmentId);
-              console.log('Booking data:', bookingData);
-
-              const result = await bookAppointment(appointmentId, bookingData);
-
-              console.log('=== BOOKING SUCCESS ===');
-              console.log('Result:', result);
+              await bookAppointment(appointmentId, bookingData);
 
               Alert.alert(
                 'Success!',
@@ -84,17 +69,11 @@ export default function AppointmentDetailsScreen({ route, navigation }) {
                 [
                   {
                     text: 'OK',
-                    onPress: () => {
-                      console.log('Navigating to Home');
-                      navigation.navigate('Home');
-                    },
+                    onPress: () => navigation.navigate('Home'),
                   },
                 ]
               );
             } catch (error) {
-              console.log('=== BOOKING FAILED ===');
-              console.error('Error details:', error);
-              console.error('Error response:', error.response?.data);
               Alert.alert('Booking Failed', error.toString());
             } finally {
               setBooking(false);
@@ -105,7 +84,17 @@ export default function AppointmentDetailsScreen({ route, navigation }) {
     );
   };
 
-  const formatDate = (dateString) => {
+  const openMaps = () => {
+    const address = encodeURIComponent(appointment.location);
+    const url = Platform.select({
+      ios: `maps://app?daddr=${address}`,
+      android: `geo:0,0?q=${address}`,
+      web: `https://www.google.com/maps/search/?api=1&query=${address}`,
+    });
+    Linking.openURL(url);
+  };
+
+  const formatDateLong = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
       weekday: 'long',
@@ -146,18 +135,32 @@ export default function AppointmentDetailsScreen({ route, navigation }) {
   const canBook = appointment.status === 'pending' && !appointment.customer;
   const isBooked = appointment.customer?.id === user?.id;
 
-  console.log('Rendering buttons - canBook:', canBook, 'isBooked:', isBooked);
-  console.log('Appointment status:', appointment.status, 'Customer:', appointment.customer);
-
   return (
     <ScrollView style={styles.container}>
+      {/* Prominent Date/Time Card */}
+      <Surface style={styles.dateTimeCard} elevation={2}>
+        <View style={styles.dateTimeContent}>
+          <Icon name="calendar" size={32} color={COLORS.primary} />
+          <View style={styles.dateTimeText}>
+            <Text variant="titleLarge" style={styles.dateText}>
+              {formatDateLong(appointment.time)}
+            </Text>
+            <Text variant="titleMedium" style={styles.timeText}>
+              {formatTime(appointment.time)}
+            </Text>
+          </View>
+        </View>
+      </Surface>
+
       <Card style={styles.card}>
         <Card.Content>
           {/* Stylist Info */}
           <View style={styles.section}>
-            <Text variant="headlineSmall" style={styles.stylistName}>
-              {appointment.stylist?.name}
-            </Text>
+            <Pressable onPress={() => navigation.navigate('StylistProfile', { stylist: appointment.stylist })}>
+              <Text variant="headlineSmall" style={[styles.stylistName, styles.clickable]}>
+                {appointment.stylist?.name}
+              </Text>
+            </Pressable>
             <Text variant="bodyMedium" style={styles.username}>
               @{appointment.stylist?.username}
             </Text>
@@ -170,21 +173,6 @@ export default function AppointmentDetailsScreen({ route, navigation }) {
 
           <Divider style={styles.divider} />
 
-          {/* Date & Time */}
-          <View style={styles.section}>
-            <Text variant="titleMedium" style={styles.sectionTitle}>
-              📅 When
-            </Text>
-            <Text variant="bodyLarge" style={styles.infoText}>
-              {formatDate(appointment.time)}
-            </Text>
-            <Text variant="bodyLarge" style={styles.infoText}>
-              {formatTime(appointment.time)}
-            </Text>
-          </View>
-
-          <Divider style={styles.divider} />
-
           {/* Location */}
           <View style={styles.section}>
             <Text variant="titleMedium" style={styles.sectionTitle}>
@@ -193,6 +181,15 @@ export default function AppointmentDetailsScreen({ route, navigation }) {
             <Text variant="bodyLarge" style={styles.infoText}>
               {appointment.location}
             </Text>
+            <Button
+              mode="outlined"
+              icon="directions"
+              onPress={openMaps}
+              style={styles.directionsButton}
+              compact
+            >
+              Get Directions
+            </Button>
           </View>
 
           {/* Services */}
@@ -269,6 +266,44 @@ const styles = StyleSheet.create({
     marginTop: SPACING.md,
     color: COLORS.textLight,
   },
+  dateTimeCard: {
+    margin: SPACING.md,
+    marginBottom: 0,
+    padding: SPACING.lg,
+    backgroundColor: COLORS.card,
+    borderRadius: 16,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 4,
+      },
+      web: {
+        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+      },
+    }),
+  },
+  dateTimeContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+  },
+  dateTimeText: {
+    flex: 1,
+  },
+  dateText: {
+    fontWeight: 'bold',
+    color: COLORS.text,
+    marginBottom: SPACING.xs,
+  },
+  timeText: {
+    color: COLORS.primary,
+    fontWeight: '600',
+  },
   card: {
     margin: SPACING.md,
     backgroundColor: COLORS.card,
@@ -280,6 +315,10 @@ const styles = StyleSheet.create({
     color: COLORS.primary,
     fontWeight: 'bold',
     marginBottom: SPACING.xs,
+  },
+  clickable: {
+    textDecorationLine: 'underline',
+    color: COLORS.primary,
   },
   username: {
     color: COLORS.textLight,
@@ -305,6 +344,11 @@ const styles = StyleSheet.create({
   divider: {
     backgroundColor: COLORS.border,
   },
+  directionsButton: {
+    marginTop: SPACING.sm,
+    borderRadius: 12,
+    alignSelf: 'flex-start',
+  },
   bookedChip: {
     alignSelf: 'flex-start',
     backgroundColor: COLORS.success + '20',
@@ -322,6 +366,7 @@ const styles = StyleSheet.create({
   },
   bookButton: {
     backgroundColor: COLORS.primary,
+    borderRadius: 12,
   },
   bookButtonContent: {
     paddingVertical: SPACING.sm,

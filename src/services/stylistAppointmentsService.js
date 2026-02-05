@@ -49,7 +49,7 @@ export const createAvailability = async (appointmentData) => {
 // Mark appointment as completed
 export const completeAppointment = async (appointmentId) => {
   try {
-    const response = await api.post(`/stylist/appointments/${appointmentId}/complete`);
+    const response = await api.patch(`/stylist/appointments/${appointmentId}/complete`);
     return response.data;
   } catch (error) {
     throw error.response?.data?.error || 'Failed to complete appointment';

@@ -8,6 +8,8 @@ import HomeScreen from '../screens/HomeScreen';
 import BrowseAppointmentsScreen from '../screens/customer/BrowseAppointmentsScreen';
 import AppointmentDetailsScreen from '../screens/customer/AppointmentDetailsScreen';
 import MyBookingsScreen from '../screens/customer/MyBookingsScreen';
+import LeaveReviewScreen from '../screens/customer/LeaveReviewScreen';
+import StylistProfileScreen from '../screens/customer/StylistProfileScreen';
 import StylistAppointmentsScreen from '../screens/stylist/StylistAppointmentsScreen';
 import CreateAvailabilityScreen from '../screens/stylist/CreateAvailabilityScreen';
 
@@ -47,6 +49,16 @@ export default function AppNavigator() {
             name="MyBookings"
             component={MyBookingsScreen}
             options={{ title: 'My Bookings' }}
+          />
+          <Stack.Screen
+            name="LeaveReview"
+            component={LeaveReviewScreen}
+            options={{ title: 'Leave a Review' }}
+          />
+          <Stack.Screen
+            name="StylistProfile"
+            component={StylistProfileScreen}
+            options={{ title: 'Stylist Profile' }}
           />
           <Stack.Screen
             name="StylistAppointments"

@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, StyleSheet, FlatList, RefreshControl } from 'react-native';
-import { Text, ActivityIndicator, SegmentedButtons, Surface } from 'react-native-paper';
+import { Text, SegmentedButtons, Surface, Button } from 'react-native-paper';
 import { useFocusEffect } from '@react-navigation/native';
-import { getMyAppointments } from '../../services/appointmentsService';
+import Alert from '../../utils/Alert';
+import { getMyAppointments, cancelBooking } from '../../services/appointmentsService';
 import AppointmentCard from '../../components/AppointmentCard';
+import AppointmentCardSkeleton from '../../components/skeletons/AppointmentCardSkeleton';
 import { COLORS, SPACING } from '../../constants';
 
 export default function MyBookingsScreen({ navigation }) {
@@ -55,6 +57,29 @@ export default function MyBookingsScreen({ navigation }) {
       setLoading(false);
       setRefreshing(false);
     }
+  };
+
+  const handleCancel = async (appointmentId) => {
+    Alert.alert(
+      'Cancel Booking',
+      'Are you sure you want to cancel this booking?',
+      [
+        { text: 'No', style: 'cancel' },
+        {
+          text: 'Yes, Cancel',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await cancelBooking(appointmentId);
+              Alert.alert('Cancelled', 'Your booking has been cancelled');
+              fetchAppointments(true);
+            } catch (error) {
+              Alert.alert('Error', error.toString());
+            }
+          },
+        },
+      ]
+    );
   };
 
   const handleRefresh = () => {
@@ -111,6 +136,37 @@ export default function MyBookingsScreen({ navigation }) {
             {item.status.toUpperCase()}
           </Text>
         </View>
+        {item.status === 'completed' && !item.review && (
+          <View style={styles.actions}>
+            <Button
+              mode="contained"
+              onPress={() => navigation.navigate('LeaveReview', {
+                appointmentId: item.id,
+                stylistName: item.stylist.name,
+                service: item.selected_service,
+              })}
+              style={styles.reviewButton}
+              compact
+              icon="star"
+            >
+              Leave Review
+            </Button>
+          </View>
+        )}
+        {(item.status === 'pending' || item.status === 'booked') && (
+          <View style={styles.actions}>
+            <Button
+              mode="outlined"
+              onPress={() => handleCancel(item.id)}
+              style={styles.cancelButton}
+              compact
+              textColor={COLORS.error}
+              icon="close-circle"
+            >
+              Cancel Booking
+            </Button>
+          </View>
+        )}
       </Surface>
     );
   };
@@ -131,11 +187,10 @@ export default function MyBookingsScreen({ navigation }) {
       </Surface>
 
       {loading ? (
-        <View style={styles.centerContainer}>
-          <ActivityIndicator size="large" />
-          <Text variant="bodyMedium" style={styles.loadingText}>
-            Loading your bookings...
-          </Text>
+        <View style={styles.skeletonContainer}>
+          <AppointmentCardSkeleton />
+          <AppointmentCardSkeleton />
+          <AppointmentCardSkeleton />
         </View>
       ) : (
         <FlatList
@@ -191,6 +246,23 @@ const styles = StyleSheet.create({
   statusText: {
     fontWeight: 'bold',
     fontSize: 10,
+  },
+  actions: {
+    marginTop: SPACING.sm,
+    paddingTop: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    paddingBottom: SPACING.sm,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border || '#e0e0e0',
+  },
+  reviewButton: {
+    backgroundColor: COLORS.primary,
+  },
+  skeletonContainer: {
+    padding: SPACING.md,
+  },
+  cancelButton: {
+    borderColor: COLORS.error || '#d32f2f',
   },
   emptyContainer: {
     flex: 1,

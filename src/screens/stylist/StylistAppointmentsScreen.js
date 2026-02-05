@@ -3,7 +3,7 @@ import { View, StyleSheet, FlatList, RefreshControl } from 'react-native';
 import { Text, ActivityIndicator, SegmentedButtons, Surface, FAB, Button } from 'react-native-paper';
 import { useFocusEffect } from '@react-navigation/native';
 import Alert from '../../utils/Alert';
-import { getStylistAppointments, acceptAppointment, cancelAppointment } from '../../services/stylistAppointmentsService';
+import { getStylistAppointments, acceptAppointment, cancelAppointment, completeAppointment } from '../../services/stylistAppointmentsService';
 import { COLORS, SPACING } from '../../constants';
 
 export default function StylistAppointmentsScreen({ navigation }) {
@@ -89,6 +89,28 @@ export default function StylistAppointmentsScreen({ navigation }) {
     );
   };
 
+  const handleComplete = async (appointmentId) => {
+    Alert.alert(
+      'Mark as Completed',
+      'Mark this appointment as completed?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Complete',
+          onPress: async () => {
+            try {
+              await completeAppointment(appointmentId);
+              Alert.alert('Success', 'Appointment marked as completed');
+              fetchAppointments(true);
+            } catch (error) {
+              Alert.alert('Error', error.toString());
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
@@ -161,6 +183,7 @@ export default function StylistAppointmentsScreen({ navigation }) {
               onPress={() => handleAccept(item.id)}
               style={[styles.actionButton, styles.acceptButton]}
               compact
+              icon="check-circle"
             >
               Accept
             </Button>
@@ -169,6 +192,8 @@ export default function StylistAppointmentsScreen({ navigation }) {
               onPress={() => handleCancel(item.id)}
               style={styles.actionButton}
               compact
+              icon="close-circle"
+              textColor={COLORS.error}
             >
               Decline
             </Button>
@@ -178,10 +203,21 @@ export default function StylistAppointmentsScreen({ navigation }) {
         {isBooked && (
           <View style={styles.actions}>
             <Button
+              mode="contained"
+              onPress={() => handleComplete(item.id)}
+              style={[styles.actionButton, styles.completeButton]}
+              compact
+              icon="check-circle"
+            >
+              Mark Complete
+            </Button>
+            <Button
               mode="outlined"
               onPress={() => handleCancel(item.id)}
               style={styles.actionButton}
               compact
+              icon="close-circle"
+              textColor={COLORS.error}
             >
               Cancel
             </Button>
@@ -344,6 +380,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   acceptButton: {
+    backgroundColor: COLORS.success,
+  },
+  completeButton: {
     backgroundColor: COLORS.success,
   },
   emptyContainer: {

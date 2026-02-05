@@ -53,3 +53,13 @@ export const getMyAppointments = async (filters = {}) => {
     throw error.response?.data?.error || 'Failed to fetch your appointments';
   }
 };
+
+// Cancel a booking
+export const cancelBooking = async (appointmentId) => {
+  try {
+    const response = await api.delete(`/appointments/${appointmentId}/cancel`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data?.error || 'Failed to cancel booking';
+  }
+};

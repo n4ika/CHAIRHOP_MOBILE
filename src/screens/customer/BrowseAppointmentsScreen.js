@@ -3,6 +3,7 @@ import { View, StyleSheet, FlatList, RefreshControl } from 'react-native';
 import { Text, ActivityIndicator, Button, Searchbar } from 'react-native-paper';
 import { getAppointments } from '../../services/appointmentsService';
 import AppointmentCard from '../../components/AppointmentCard';
+import AppointmentCardSkeleton from '../../components/skeletons/AppointmentCardSkeleton';
 import { COLORS, SPACING } from '../../constants';
 
 export default function BrowseAppointmentsScreen({ navigation }) {
@@ -110,11 +111,10 @@ export default function BrowseAppointmentsScreen({ navigation }) {
       />
 
       {loading && page === 1 ? (
-        <View style={styles.centerContainer}>
-          <ActivityIndicator size="large" />
-          <Text variant="bodyMedium" style={styles.loadingText}>
-            Loading appointments...
-          </Text>
+        <View style={styles.skeletonContainer}>
+          <AppointmentCardSkeleton />
+          <AppointmentCardSkeleton />
+          <AppointmentCardSkeleton />
         </View>
       ) : (
         <FlatList
@@ -172,6 +172,9 @@ const styles = StyleSheet.create({
   emptySubtext: {
     color: COLORS.textLight,
     textAlign: 'center',
+  },
+  skeletonContainer: {
+    padding: SPACING.md,
   },
   footerLoader: {
     padding: SPACING.lg,

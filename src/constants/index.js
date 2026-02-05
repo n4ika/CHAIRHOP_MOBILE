@@ -7,16 +7,18 @@ export const API_URL = __DEV__
   : 'https://your-production-url.com/api/v1';
 
 export const COLORS = {
-  primary: '#667eea',
-  secondary: '#764ba2',
-  accent: '#f093fb',
-  background: '#f5f5f5',
-  card: '#ffffff',
-  text: '#333333',
-  textLight: '#666666',
-  border: '#e0e0e0',
-  error: '#f44336',
-  success: '#4caf50',
+  primary: '#6200EE',
+  primaryLight: '#7C4DFF',
+  primaryDark: '#4527A0',
+  secondary: '#03DAC6',
+  background: '#F5F5F5',
+  card: '#FFFFFF',
+  text: '#212121',
+  textLight: '#757575',
+  success: '#4CAF50',
+  error: '#F44336',
+  warning: '#FF9800',
+  border: '#E0E0E0',
 };
 
 export const SPACING = {
