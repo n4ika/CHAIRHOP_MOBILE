@@ -14,6 +14,8 @@ import StylistAppointmentsScreen from '../screens/stylist/StylistAppointmentsScr
 import CreateAvailabilityScreen from '../screens/stylist/CreateAvailabilityScreen';
 import ConversationsScreen from '../screens/common/ConversationsScreen';
 import ChatScreen from '../screens/common/ChatScreen';
+import PaymentScreen from '../screens/customer/PaymentScreen';
+import ProfileScreen from '../screens/common/ProfileScreen';
 
 const Stack = createStackNavigator();
 
@@ -81,6 +83,16 @@ export default function AppNavigator() {
             name="Chat"
             component={ChatScreen}
             options={({ route }) => ({ title: route.params?.otherUser?.name || 'Chat' })}
+          />
+          <Stack.Screen
+            name="Payment"
+            component={PaymentScreen}
+            options={{ title: 'Payment' }}
+          />
+          <Stack.Screen
+            name="Profile"
+            component={ProfileScreen}
+            options={{ title: 'My Profile' }}
           />
         </Stack.Navigator>
       ) : (

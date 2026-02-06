@@ -80,6 +80,15 @@ export default function HomeScreen({ navigation }) {
 
         <Button
           mode="outlined"
+          onPress={() => navigation.navigate('Profile')}
+          style={styles.button}
+          icon="account"
+        >
+          Profile
+        </Button>
+
+        <Button
+          mode="outlined"
           onPress={sendTestNotification}
           style={styles.button}
           icon="bell-ring"

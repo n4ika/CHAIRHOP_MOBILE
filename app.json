@@ -44,6 +44,12 @@
         {
           "color": "#6200EE"
         }
+      ],
+      [
+        "react-native-square-in-app-payments",
+        {
+          "squareApplicationId": "sandbox-sq0idb-ueD3Qq1kVKBO-VV8W3TwZg"
+        }
       ]
     ],
     "notification": {

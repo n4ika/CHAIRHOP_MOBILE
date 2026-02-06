@@ -22,6 +22,7 @@ import { AuthContext } from '../../context/AuthContext';
 import { getAppointment, bookAppointment } from '../../services/appointmentsService';
 import { addAppointmentToCalendar } from '../../utils/calendarUtils';
 import { createConversation } from '../../services/messagingService';
+import { getPaymentStatus } from '../../services/paymentService';
 import { COLORS, SPACING } from '../../constants';
 
 export default function AppointmentDetailsScreen({ route, navigation }) {
@@ -30,10 +31,21 @@ export default function AppointmentDetailsScreen({ route, navigation }) {
   const [appointment, setAppointment] = useState(null);
   const [loading, setLoading] = useState(true);
   const [booking, setBooking] = useState(false);
+  const [paymentInfo, setPaymentInfo] = useState(null);
 
   useEffect(() => {
     fetchAppointment();
-  }, []);
+    fetchPaymentInfo();
+  }, [appointmentId]);
+
+  const fetchPaymentInfo = async () => {
+    try {
+      const data = await getPaymentStatus(appointmentId);
+      setPaymentInfo(data);
+    } catch (error) {
+      // Payment info not available - this is fine for unpaid appointments
+    }
+  };
 
   const fetchAppointment = async () => {
     try {
@@ -238,6 +250,20 @@ export default function AppointmentDetailsScreen({ route, navigation }) {
             </>
           )}
 
+          {/* Payment Status */}
+          {paymentInfo?.payment_status === 'paid' && (
+            <>
+              <Divider style={styles.divider} />
+              <View style={styles.section}>
+                <Surface style={styles.paymentBadge} elevation={0}>
+                  <Text style={styles.paymentText}>
+                    Paid ${paymentInfo.payment_amount}
+                  </Text>
+                </Surface>
+              </View>
+            </>
+          )}
+
           {/* Booked indicator */}
           {isBooked && (
             <>
@@ -260,14 +286,18 @@ export default function AppointmentDetailsScreen({ route, navigation }) {
         {canBook && (
           <Button
             mode="contained"
-            onPress={handleBook}
+            onPress={() => navigation.navigate('Payment', {
+              appointmentId: appointment.id,
+              amount: 50.00,
+              serviceName: appointment.selected_service || 'Haircut'
+            })}
             loading={booking}
             disabled={booking}
             style={styles.bookButton}
             contentStyle={styles.bookButtonContent}
-            icon="calendar-check"
+            icon="credit-card"
           >
-            Book This Appointment
+            Book & Pay ($50.00)
           </Button>
         )}
 
@@ -438,5 +468,16 @@ const styles = StyleSheet.create({
   calendarButton: {
     marginTop: SPACING.md,
     borderRadius: 12,
+  },
+  paymentBadge: {
+    backgroundColor: COLORS.success + '20',
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    borderRadius: 8,
+    alignSelf: 'flex-start',
+  },
+  paymentText: {
+    color: COLORS.success,
+    fontWeight: 'bold',
   },
 });
